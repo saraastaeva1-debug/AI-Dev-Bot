@@ -1,0 +1,105 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  height: 100vh;
+  background: radial-gradient(circle at top, #1b1030 0, #050509 45%, #050509 100%);
+  color: #eaeaea;
+  font-family: "Inter", sans-serif;
+}
+.app {
+  display: flex;
+  height: 100vh;
+}
+.chat {
+  width: 40%;
+  border-right: 1px solid #241b3a;
+  display: flex;
+  flex-direction: column;
+  background: rgba(5, 5, 15, 0.95);
+  backdrop-filter: blur(18px);
+}
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #241b3a;
+  background: linear-gradient(90deg, #12091f, #1c1030);
+}
+.logo-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: radial-gradient(circle, #7b4dff, #3b1a8f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.title-block {
+  margin-left: 12px;
+}
+.messages {
+  flex: 1;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+.msg {
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  max-width: 85%;
+}
+.msg.bot {
+  background: #151022;
+  border-left: 3px solid #7b4dff;
+  box-shadow: 0 0 14px #7b4dff44;
+}
+.msg.user {
+  background: #7b4dff;
+  margin-left: auto;
+  box-shadow: 0 0 14px #7b4dff55;
+}
+.input-area {
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #241b3a;
+  background: #080712;
+}
+.input-area input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid #2b2140;
+  background: #120f1f;
+  color: #f5f5ff;
+}
+.input-area button {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #7b4dff, #b37bff);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+.preview {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  background: #050509;
+}
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #241b3a;
+  background: linear-gradient(90deg, #12091f, #1c1030);
+}
+iframe {
+  flex: 1;
+  border: none;
+  background: #0b0b12;
+}

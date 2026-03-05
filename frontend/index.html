@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Dev Bot</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <div class="chat">
+      <div class="chat-header">
+        <div class="logo-circle">AI</div>
+        <div class="title-block">
+          <h1>AI Dev Bot</h1>
+          <p>ИИ‑разработчик на Gemini</p>
+        </div>
+      </div>
+      <div class="messages" id="messages"></div>
+      <div class="input-area">
+        <input id="input" placeholder="Опиши сайт, который хочешь создать..." />
+        <button id="sendBtn">Сгенерировать</button>
+      </div>
+    </div>
+    <div class="preview">
+      <div class="preview-header">
+        <span>Предпросмотр сайта</span>
+        <button id="openNewTabBtn">Открыть в новой вкладке</button>
+      </div>
+      <iframe id="previewFrame"></iframe>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
