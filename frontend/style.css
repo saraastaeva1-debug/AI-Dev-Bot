@@ -103,3 +103,53 @@ iframe {
   border: none;
   background: #0b0b12;
 }
+.history-panel {
+  padding: 8px 14px;
+  border-top: 1px solid #241b3a;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.history-title {
+  font-size: 12px;
+  color: #7b4dff;
+  margin-bottom: 4px;
+}
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding: 4px 0;
+  border-bottom: 1px solid #1a1030;
+  color: #aaa;
+}
+.history-item button {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: none;
+  background: #7b4dff;
+  color: white;
+  font-size: 11px;
+  cursor: pointer;
+}
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px;
+  border-top: 1px solid #241b3a;
+  background: #080712;
+}
+.action-buttons button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 999px;
+  border: none;
+  background: #1a1030;
+  color: #b37bff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.action-buttons button:hover {
+  background: #7b4dff;
+  color: white;
+}

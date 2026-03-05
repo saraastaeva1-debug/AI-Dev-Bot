@@ -5,12 +5,41 @@ const sendBtn = document.getElementById("sendBtn");
 const previewFrame = document.getElementById("previewFrame");
 const openNewTabBtn = document.getElementById("openNewTabBtn");
 
+let currentHTML = "";
+let history = JSON.parse(localStorage.getItem("siteHistory") || "[]");
+
 function addMessage(text, from = "bot") {
   const div = document.createElement("div");
   div.classList.add("msg", from);
   div.textContent = text;
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function saveToHistory(prompt, html) {
+  history.unshift({ prompt, html, date: new Date().toLocaleString() });
+  if (history.length > 10) history.pop();
+  localStorage.setItem("siteHistory", JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const historyEl = document.getElementById("history-list");
+  if (!historyEl) return;
+  historyEl.innerHTML = "";
+  history.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.classList.add("history-item");
+    div.innerHTML = `<span>${item.date}: ${item.prompt.slice(0, 30)}...</span>
+      <button onclick="loadFromHistory(${i})">Загрузить</button>`;
+    historyEl.appendChild(div);
+  });
+}
+
+function loadFromHistory(i) {
+  currentHTML = history[i].html;
+  previewFrame.srcdoc = currentHTML;
+  addMessage(`Загружено: ${history[i].prompt}`, "bot");
 }
 
 async function fillImages(doc) {
@@ -37,30 +66,71 @@ async function generateSite() {
   if (!prompt) return;
   addMessage(prompt, "user");
   inputEl.value = "";
-  addMessage("Генерирую сайт на Gemini…", "bot");
-  try {
-    const res = await fetch(`${API_BASE}/api/generate-site`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json();
-    if (data.html) {
-      // Убираем markdown обёртку если есть
-      let html = data.html.replace(/^```html\n?/, "").replace(/\n?```$/, "");
-      previewFrame.srcdoc = html;
-      addMessage("Готово! Генерирую картинки…", "bot");
-      // Ждём загрузки iframe потом заполняем картинки
-      previewFrame.onload = async () => {
-        await fillImages(previewFrame.contentDocument);
-        addMessage("Картинки готовы! 🎨", "bot");
-      };
-    } else {
-      addMessage("Ошибка: модель не вернула HTML.", "bot");
+
+  if (currentHTML) {
+    addMessage("Редактирую сайт…", "bot");
+    try {
+      const res = await fetch(`${API_BASE}/api/edit-site`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, html: currentHTML })
+      });
+      const data = await res.json();
+      if (data.html) {
+        currentHTML = data.html.replace(/^```html\n?/, "").replace(/\n?```$/, "");
+        previewFrame.srcdoc = currentHTML;
+        addMessage("Готово! Генерирую картинки…", "bot");
+        previewFrame.onload = async () => {
+          await fillImages(previewFrame.contentDocument);
+          addMessage("Картинки готовы! 🎨", "bot");
+        };
+        saveToHistory(prompt, currentHTML);
+      }
+    } catch (err) {
+      addMessage("Ошибка при редактировании.", "bot");
     }
-  } catch (err) {
-    addMessage("Ошибка при генерации сайта.", "bot");
+  } else {
+    addMessage("Генерирую сайт на Gemini…", "bot");
+    try {
+      const res = await fetch(`${API_BASE}/api/generate-site`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data.html) {
+        currentHTML = data.html.replace(/^```html\n?/, "").replace(/\n?```$/, "");
+        previewFrame.srcdoc = currentHTML;
+        addMessage("Готово! Генерирую картинки…", "bot");
+        previewFrame.onload = async () => {
+          await fillImages(previewFrame.contentDocument);
+          addMessage("Картинки готовы! 🎨", "bot");
+        };
+        saveToHistory(prompt, currentHTML);
+      } else {
+        addMessage("Ошибка: модель не вернула HTML.", "bot");
+      }
+    } catch (err) {
+      addMessage("Ошибка при генерации сайта.", "bot");
+    }
   }
+}
+
+function downloadSite() {
+  if (!currentHTML) return addMessage("Сначала создай сайт!", "bot");
+  const blob = new Blob([currentHTML], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "my-site.html";
+  a.click();
+  addMessage("Сайт сохранён как my-site.html! 💾", "bot");
+}
+
+function newSite() {
+  currentHTML = "";
+  previewFrame.srcdoc = "";
+  addMessage("Начинаем новый сайт! Опиши что хочешь.", "bot");
 }
 
 sendBtn.addEventListener("click", generateSite);
@@ -69,8 +139,13 @@ inputEl.addEventListener("keydown", (e) => {
 });
 
 openNewTabBtn.addEventListener("click", () => {
-  const html = previewFrame.srcdoc || "<h1>Нет данных</h1>";
-  const blob = new Blob([html], { type: "text/html" });
+  if (!currentHTML) return;
+  const blob = new Blob([currentHTML], { type: "text/html" });
   const url = URL.createObjectURL(blob);
   window.open(url, "_blank");
 });
+
+document.getElementById("downloadBtn").addEventListener("click", downloadSite);
+document.getElementById("newSiteBtn").addEventListener("click", newSite);
+
+renderHistory();

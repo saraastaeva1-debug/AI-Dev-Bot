@@ -60,7 +60,21 @@ app.post("/api/generate-site", async (req, res) => {
     res.status(500).json({ error: "Ошибка генерации сайта" });
   }
 });
-
+app.post("/api/edit-site", async (req, res) => {
+  try {
+    const { prompt, html } = req.body;
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `Ты — ИИ-разработчик. Вот существующий HTML сайт:\n\n${html}\n\nВнеси следующие изменения: ${prompt}\n\nВерни ТОЛЬКО полный обновлённый HTML без лишнего текста.`
+    });
+    const newHtml = result.text;
+    if (!newHtml) throw new Error("Пустой ответ");
+    res.json({ html: newHtml });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Ошибка редактирования" });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
