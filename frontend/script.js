@@ -13,6 +13,25 @@ function addMessage(text, from = "bot") {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
+async function fillImages(doc) {
+  const images = doc.querySelectorAll("img.ai-image");
+  for (const img of images) {
+    const prompt = img.getAttribute("data-prompt");
+    if (!prompt) continue;
+    try {
+      const res = await fetch(`${API_BASE}/api/generate-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data.image) img.src = data.image;
+    } catch (err) {
+      console.error("Ошибка картинки:", err);
+    }
+  }
+}
+
 async function generateSite() {
   const prompt = inputEl.value.trim();
   if (!prompt) return;
@@ -27,8 +46,15 @@ async function generateSite() {
     });
     const data = await res.json();
     if (data.html) {
-      previewFrame.srcdoc = data.html;
-      addMessage("Готово! Сайт отображается справа.", "bot");
+      // Убираем markdown обёртку если есть
+      let html = data.html.replace(/^```html\n?/, "").replace(/\n?```$/, "");
+      previewFrame.srcdoc = html;
+      addMessage("Готово! Генерирую картинки…", "bot");
+      // Ждём загрузки iframe потом заполняем картинки
+      previewFrame.onload = async () => {
+        await fillImages(previewFrame.contentDocument);
+        addMessage("Картинки готовы! 🎨", "bot");
+      };
     } else {
       addMessage("Ошибка: модель не вернула HTML.", "bot");
     }
