@@ -128,16 +128,15 @@ async function downloadSite() {
     const src = img.getAttribute("src");
     if (!src || src.startsWith("data:")) continue;
     try {
-      const response = await fetch(src);
-      const blob = await response.blob();
-      const base64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
+      const res = await fetch("/api/proxy-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: src })
       });
-      img.src = base64;
+      const data = await res.json();
+      if (data.base64) img.src = data.base64;
     } catch (err) {
-      console.error("Ошибка конвертации картинки:", err);
+      console.error("Ошибка конвертации:", err);
     }
   }
 

@@ -80,6 +80,19 @@ app.post("/api/edit-site", async (req, res) => {
     res.status(500).json({ error: "Ошибка редактирования" });
   }
 });
+app.post("/api/proxy-image", async (req, res) => {
+  try {
+    const { url } = req.body;
+    const response = await fetch(url);
+    const buffer = await response.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString("base64");
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    res.json({ base64: `data:${contentType};base64,${base64}` });
+  } catch (err) {
+    console.error("Ошибка proxy:", err);
+    res.status(500).json({ error: "Ошибка загрузки картинки" });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
