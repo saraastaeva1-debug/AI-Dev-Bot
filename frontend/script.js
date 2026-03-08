@@ -116,15 +116,39 @@ async function generateSite() {
   }
 }
 
-function downloadSite() {
+async function downloadSite() {
   if (!currentHTML) return addMessage("Сначала создай сайт!", "bot");
-  const blob = new Blob([currentHTML], { type: "text/html" });
+  addMessage("Подготавливаю сайт для скачивания…", "bot");
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(currentHTML, "text/html");
+  const images = doc.querySelectorAll("img");
+
+  for (const img of images) {
+    const src = img.getAttribute("src");
+    if (!src || src.startsWith("data:")) continue;
+    try {
+      const response = await fetch(src);
+      const blob = await response.blob();
+      const base64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+      img.src = base64;
+    } catch (err) {
+      console.error("Ошибка конвертации картинки:", err);
+    }
+  }
+
+  const finalHTML = doc.documentElement.outerHTML;
+  const blob = new Blob([finalHTML], { type: "text/html" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = "my-site.html";
   a.click();
-  addMessage("Сайт сохранён как my-site.html! 💾", "bot");
+  addMessage("Сайт сохранён с картинками! 💾", "bot");
 }
 
 function newSite() {
