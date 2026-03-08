@@ -54,7 +54,7 @@ app.post("/api/generate-site", async (req, res) => {
   try {
     const { prompt } = req.body;
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash",
       contents: `Ты — ИИ-разработчик. Сгенерируй ПОЛНЫЙ HTML-документ с CSS и JS внутри. Только HTML код без лишнего текста. Тёмная тема, фиолетовые акценты. Там где нужны картинки используй тег <img> с классом "ai-image" и data-prompt атрибутом описывающим что должно быть на картинке на английском. Описание сайта: ${prompt}`
     });
     const html = result.text;
@@ -69,7 +69,7 @@ app.post("/api/edit-site", async (req, res) => {
   try {
     const { prompt, html } = req.body;
     const result = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash",
       contents: `Ты — ИИ-разработчик. Вот существующий HTML сайт:\n\n${html}\n\nВнеси следующие изменения: ${prompt}\n\nВерни ТОЛЬКО полный обновлённый HTML без лишнего текста.`
     });
     const newHtml = result.text;
